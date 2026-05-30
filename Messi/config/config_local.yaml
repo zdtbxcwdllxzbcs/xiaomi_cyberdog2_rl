@@ -1,0 +1,22 @@
+# 本机运行的角色。main.py 根据此值创建对应角色节点。
+# 可选值: striker | legacy_striker | policy_striker | goalkeeper
+base_config: config.yaml
+
+role: striker
+dog_namespace: xxx # 狗的名字
+
+rigids:
+  self: Rigid1 # 本机器人的动捕刚体名
+  teammate: Rigid2 # 队友的动捕刚体名
+  opponent_1: Rigid3 # 对手 1 的动捕刚体名
+  opponent_2: Rigid4 # 对手 2 的动捕刚体名
+  ball: ball # 足球的动捕刚体名
+  attack_goal: goal_right # 进攻球门（本队射入的球门）
+  defense_goal: goal_left # 防守球门（本队守护的球门）
+
+move:
+  max_speed_x: 0.8 # 前向最大速度（m/s）
+  max_speed_y: 0.8 # 侧向最大速度（m/s）
+
+striker:
+  attack_motion_id: 305 # 305 | 308

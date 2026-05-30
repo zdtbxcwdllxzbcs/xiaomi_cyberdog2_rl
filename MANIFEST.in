@@ -1,0 +1,1 @@
+recursive-include cyberdog2_rl_lab/assets/data/cyberdog2 *.dae *.urdf

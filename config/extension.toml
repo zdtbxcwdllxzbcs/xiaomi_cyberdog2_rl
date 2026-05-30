@@ -1,0 +1,22 @@
+[package]
+version = "0.1.0"
+category = "isaaclab"
+readme = "README.md"
+
+title = "Cyberdog2 RL Lab"
+author = "Cyberdog Lab"
+maintainer = "Cyberdog Lab"
+description = "reinforcement learning environments for Xiaomi Cyberdog2"
+repository = "https://example.com/cyberdog2_rl_lab"
+keywords = ["extension", "isaaclab", "cyberdog2", "quadruped"]
+
+[dependencies]
+"isaaclab" = {}
+"isaaclab_assets" = {}
+"isaaclab_rl" = {}
+"isaaclab_tasks" = {}
+
+[[python.module]]
+name = "cyberdog2_rl_lab"
+
+[isaaclab_settings]

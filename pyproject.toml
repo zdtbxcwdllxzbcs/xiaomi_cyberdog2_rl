@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools", "wheel", "toml"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cyberdog2_rl_lab"
+version = "0.1.0"
+description = "IsaacLab locomotion environments for Xiaomi Cyberdog2."
+dependencies = [
+    "psutil",
+    "pyyaml",
+]
+requires-python = ">=3.10"
+license = { text = "Apache 2.0" }
+authors = [
+    { name = "Cyberdog Lab" }
+]
+maintainers = [
+    { name = "Cyberdog Lab" }
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: Microsoft :: Windows",
+]
+dynamic = []

@@ -1,0 +1,90 @@
+# Simulation config for Team A Robot 2.
+# Common measured values are inherited from config.yaml. Keep normal sim files
+# limited to per-robot role/identity; uncomment blocks below only for sim tuning.
+base_config: config.yaml
+
+role: goalkeeper
+dog_namespace: team_a/robot_2
+
+topics:
+  prefix: /soccer/team/team_a/robot_2
+
+rigids:
+  self: team_a_2
+  teammate: team_a_1
+  opponent_1: team_b_1
+  opponent_2: team_b_2
+  ball: soccer_ball
+  attack_goal: goal_b
+  defense_goal: goal_a
+
+sim:
+  team: team_a
+  robot_id: robot_2
+  kickoff_pose:
+    x: 0.0
+    y: -4.72
+    yaw: 0.0
+  home_pose:
+    x: 0.0
+    y: -4.5
+    yaw: 1.5708
+
+# Optional sim-only overrides. Uncomment specific values to override config.yaml.
+# field:
+#   length: 8.8
+#   width: 5.55
+#   goal_width: 1.0
+#   boundary_margin: 0.15
+
+# locator:
+#   publish_rate_hz: 20.0
+#   required_objects:
+#     - self
+#     - ball
+#     - attack_goal
+#     - defense_goal
+
+# move:
+#   publish_rate_hz: 10.0
+#   motion_id: 303
+#   stop_motion_id: 101
+#   max_speed_x: 1.0
+#   max_speed_y: 1.0
+#   max_speed_yaw: 1.5
+#   command_sign_x: 1.0
+#   command_sign_y: 1.0
+#   command_sign_yaw: 1.0
+#   step_height: 0.05
+
+# path:
+#   resolution: 0.1
+#   obstacle_radius: 0.35
+#   ball_keepout_radius: 0.18
+#   goal_tolerance: 0.18
+#   waypoint_tolerance: 0.18
+#   lookahead_points: 2
+#   replan_rate_hz: 5.0
+#   approach_distance: 0.55
+#   max_waypoints: 160
+
+# striker:
+#   control_rate_hz: 10.0
+#   possession_distance: 0.45
+#   dribble_speed: 0.65
+#   approach_gain: 0.8
+#   lateral_gain: 0.8
+#   yaw_gain: 1.2
+#   wall_escape_margin: 0.55
+#   wall_escape_inward: 1.0
+#   endline_escape_backoff: 1.0
+#   out_of_bounds_margin: 0.15
+#   attack_motion_id: 303
+# goalkeeper:
+#   control_rate_hz: 10.0
+#   guard_depth: 0.45
+#   guard_margin: 0.12
+#   intercept_distance: 0.65
+#   position_gain: 0.9
+#   yaw_gain: 1.2
+#   min_ball_speed: 0.08

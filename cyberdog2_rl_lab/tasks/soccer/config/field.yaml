@@ -1,0 +1,47 @@
+field:
+  x_width: 5.2
+  y_length: 8.93305
+  origin: center
+  x_axis: short
+  y_axis: long
+goals:
+  blue:
+    center: [0.0, -4.466525, 0.0]
+  red:
+    center: [0.0, 4.466525, 0.0]
+  width: 1.5
+teams:
+  blue_attack_sign_y: 1.0
+  red_attack_sign_y: -1.0
+kickoff_spots:
+  center: [0.0, 0.0, 0.0]
+  white_spots:
+    - [-1.3, -0.7146, 0.0]
+    - [0.0, -3.7965, 1.57079632679]
+    - [1.3, 0.7146, 3.14159265359]
+    - [0.0, 3.7965, -1.57079632679]
+  player_starts:
+    blue_attacker: [0.0, -2.23326, 1.57079632679]
+    blue_goalkeeper: [0.0, -3.7965, 1.57079632679]
+    red_attacker: [0.0, 2.23326, -1.57079632679]
+    red_goalkeeper: [0.0, 3.7965, -1.57079632679]
+objects:
+  blue_attacker: {has_yaw: true}
+  blue_goalkeeper: {has_yaw: true}
+  red_attacker: {has_yaw: true}
+  red_goalkeeper: {has_yaw: true}
+  ball: {has_yaw: false}
+  blue_goal: {has_yaw: false}
+  red_goal: {has_yaw: false}
+vrpn_frame_map:
+  BlueAttacker: blue_attacker
+  BlueGoalkeeper: blue_goalkeeper
+  RedAttacker: red_attacker
+  RedGoalkeeper: red_goalkeeper
+  Ball: ball
+normalization:
+  position: field_half_extents_xy
+  velocity_xy: 4.0
+  robot_velocity_xy: 2.0
+  yaw: sin_cos
+  action_scale: [1.2, 1.2, 3.0]

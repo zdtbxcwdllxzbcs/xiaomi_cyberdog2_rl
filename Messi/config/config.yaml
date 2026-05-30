@@ -1,0 +1,201 @@
+# 本机运行的角色。main.py 根据此值创建对应角色节点。
+# 可选值: striker | legacy_striker | policy_striker | goalkeeper
+role: policy_striker
+
+# Cyberdog 运动指令话题的命名空间，完整话题名为 /<dog_namespace>/motion_servo_cmd
+dog_namespace: mi_desktop_48_b0_2d_7b_04_c9 # 狗的名字
+
+# 运行时调度参数。Python 3.6/GIL 下过多 executor worker 会增加抢占和抖动。
+runtime:
+  executor_threads: 2
+
+# 归一化足球话题使用的坐标系名称
+frames:
+  field: field_red # 场地坐标系（红队视角，原点在中场，+y 指向进攻球门）
+  base: base_link # 机器人本体坐标系
+
+# 语义足球对象到动捕刚体名称的映射。
+# 两个球门均来自动捕，不使用固定坐标回退。
+rigids:
+  self: dog_19_2 # 本机器人的动捕刚体名
+  teammate: dog_19_1 # 队友的动捕刚体名
+  opponent_1: dog426B # 对手 1 的动捕刚体名
+  opponent_2: dog_20_2 # 对手 2 的动捕刚体名
+  ball: ball # 足球的动捕刚体名
+  attack_goal: goal_right # 进攻球门（本队射入的球门）
+  defense_goal: goal_left # 防守球门（本队守护的球门）
+
+# 场地尺寸（场地坐标系）。x 为场宽方向，y 为场长方向。单位：米
+field:
+  length: 8.93305 # 实测场地长度：goal_left 到 goal_right 的距离（m）
+  width: 5.2 # 实测可通行横向宽度：左右边界贴边中心距离（m）
+  goal_width: 1.5 # 球门宽度
+  boundary_margin: 0.15 # 边界内缩安全距离，用于判断出界
+
+# 定位节点配置。在所有 required_objects 均收到动捕数据前，角色逻辑不启动。
+locator:
+  publish_rate_hz: 20.0 # 归一化位姿话题的发布频率（Hz）
+  static_field_transform: true # 球门固定时只用首帧建立场地坐标系，减少噪声和重复计算
+  immediate_publish: true # 收到 VRPN 新样本后立即转发，timer 仅作兜底批量发布
+  required_objects: # 启动前必须就绪的对象列表
+    - self
+    - ball
+    - attack_goal
+    - defense_goal
+
+# 机器人本体系速度指令及 Cyberdog 步态参数。
+# command_sign_* 用于匹配机器人驱动层的符号约定：
+#   内部约定：vx 朝前为正，vy 朝左为正，vtheta 逆时针为正
+#   若驱动层与内部约定相同，三个符号均设为 1.0
+#   若驱动层某轴方向相反，将对应符号设为 -1.0
+move:
+  publish_rate_hz: 20.0 # 指令发布频率（Hz）
+  motion_id: 308 # 行走步态 ID（MotionServoCmd.motion_id）
+  stop_motion_id: 101 # 停止步态 ID
+  max_speed_x: 0.8 # 前向最大速度（m/s），实机保守限制防止打滑
+  max_speed_y: 1.0 # 侧向最大速度（m/s），横走腿部运动学保守上限
+  max_speed_yaw: 0.2 # 最大角速度（rad/s）
+  command_sign_x: 1.0 # 前向速度符号：+1.0 = 驱动层前为正，-1.0 = 驱动层前为负
+  command_sign_y: 1.0 # 侧向速度符号：+1.0 = 驱动层左为正，-1.0 = 驱动层左为负
+  command_sign_yaw: 1.0 # 角速度符号：+1.0 = 驱动层逆时针为正，-1.0 = 顺时针为正
+  step_height: 0.05 # 步高（m），传入 MotionServoCmd.step_height
+  publish_on_change: true # 速度变化时立即发布一帧，降低等待发布 timer 的延迟
+  command_epsilon: 0.0001 # 速度变化小于该值时不触发立即发布
+
+# A* 路径规划及路径跟随参数（striker 使用）
+path:
+  resolution: 0.1 # 栅格分辨率（m/格），越小路径越精细但计算量越大
+  obstacle_radius: 0.45 # 障碍物膨胀半径（m），包含机器人自身半径
+  ball_keepout_radius: 0.5 # 规划时球周围的禁区半径（m），避免路径穿过球
+  goal_tolerance: 0.18 # 到达终点的距离阈值（m）
+  waypoint_tolerance: 0.18 # 路径点切换的距离阈值（m）
+  lookahead_points: 2 # 路径跟随时向前预瞄的路径点数
+  replan_rate_hz: 5.0 # 路径重规划频率（Hz）；跟随仍按 striker.control_rate_hz 发速度
+  replan_min_start_delta: 0.12 # 自身移动超过该距离才触发新 A*（m）
+  replan_min_goal_delta: 0.08 # 目标点移动超过该距离才触发新 A*（m）
+  replan_min_obstacle_delta: 0.15 # 障碍物移动超过该距离才触发新 A*（m）
+  replan_max_interval: 0.35 # 即使输入变化很小，也最多间隔这么久刷新一次（s）
+  approach_distance: 0.55 # 接近球时的停止距离（m），即 approach target 到球的距离
+  max_waypoints: 5 # 单条路径最大路径点数，防止规划超时
+  max_expansions: 300 # A* 最大展开节点数，限制找不到路时的最坏耗时
+  fallback_direct_on_failure: true # A* 找不到路/超上限时发布直线路径，避免停止等待
+
+# Striker 状态机增益与距离参数
+striker:
+  control_rate_hz: 20.0 # 控制循环频率（Hz）
+  possession_distance: 0.6 # 判定"持球"的机器人到球距离阈值（m）
+  dribble_speed: 0.65 # 带球阶段的前向速度（m/s）
+  approach_gain: 0.8 # 接近目标点时的前向速度增益
+  lateral_gain: 0.5 # 侧向速度增益（用于横向对齐）
+  yaw_gain: 0.5 # 偏航角误差到角速度的增益（rad/s per rad）
+  role_state_publish_rate_hz: 5.0 # 角色状态/意图发布频率；不影响速度指令频率
+  target_publish_min_delta: 0.04 # approach target 变化超过该距离才立即发布（m）
+  target_publish_min_yaw_delta: 0.08 # approach target 朝向变化超过该角度才立即发布（rad）
+  target_publish_max_interval: 0.25 # approach target 最长刷新间隔（s）
+  # align_yaw_tolerance 可选：规则 striker 朝向软容差；不再作为进入 kick 的硬条件
+  wall_escape_margin: 0.55 # 距边界多近时触发绕墙逃脱逻辑（m）
+  wall_escape_inward: 1.0 # 绕墙时向场内偏移的距离（m）
+  endline_escape_backoff: 1.0 # 底线逃脱时向后退的距离（m）
+  legacy_latency_compensation: 0.0 # legacy striker 预测补偿的固定延迟（s）
+  legacy_max_prediction_time: 0.30 # legacy striker 最大球位置预测时长（s）
+  legacy_possession_distance: 0.55 # legacy striker 进入持球/开球的距离阈值（m）
+  legacy_orbit_tolerance: 0.3 # legacy striker 进入 kick 的站位容差（m）
+  legacy_align_yaw_tolerance: 1.1 # legacy striker 朝向软容差；不再作为进入 kick 的硬条件
+  legacy_dribble_behind_min: 0.18 # legacy striker 出脚前必须位于球后的最小纵深（m）
+  legacy_dribble_orbit_side_offset: 0.6 # legacy striker 近球绕球侧向偏移（m）
+  legacy_dribble_handoff_lateral: 0.30 # legacy striker 在 dribble 中保留/切换的横向容差（m）
+  legacy_dribble_gate_behind_offset: 0.30 # legacy striker 绕球侧切点相对球后的深度（m）
+  legacy_kick_duration: 0.65 # legacy striker 带球推进/出脚持续时间（s）
+  legacy_kick_speed: 0.95 # legacy striker 出脚时沿 kick_dir 的世界方向平移速度（m/s）
+  legacy_kick_min_speed: 0.70 # 保留兼容；方向出球不再按前向评分降速
+  legacy_kick_contact_distance: 0.5 # legacy striker 触发 kick 前机器人到球的最大距离（m）
+  legacy_dribble_release_distance: 0.82 # legacy striker 保持 dribble 的距离阈值（m）
+  legacy_dribble_lateral_release: 0.3 # legacy striker 保持 dribble 的侧向阈值（m）
+  legacy_dribble_rear_release: 0.22 # legacy striker 保持 dribble 的后向阈值（m）
+  legacy_obstacle_influence: 0.85 # legacy striker 低成本避障感知距离（m）
+  legacy_obstacle_corridor: 0.48 # legacy striker 路径走廊半宽（m）
+  legacy_obstacle_repulse_max: 0.6 # legacy striker 最大侧向避障速度偏置
+  legacy_dodge_hold_time: 0.1 # legacy striker 避障方向保持时间（s）
+  out_of_bounds_margin: 0.15 # 判定"出界"的边界外扩距离（m）
+  attack_motion_id: 305 # 带球/射门阶段使用的步态 ID
+
+# 训练好的 PPO striker 策略。相对路径从仓库根目录解析。
+striker_policy:
+  model_path: checkpoints/striker_rl/phase1/best/best_model.zip
+  deterministic: true # true = 使用确定性动作（argmax），false = 采样
+  device: auto # 推理设备：auto | cpu | cuda
+  control_rate_hz: 10.0 # 策略推理频率（Hz）
+
+# Goalkeeper 守门逻辑增益与区域参数（rule 控制器）
+goalkeeper:
+  control_rate_hz: 30.0 # 控制循环频率（Hz）
+  debug_log_hz: 0.0 # 调参日志频率；0=关闭，1~2 适合实机回传日志
+
+  guard_depth: 0.30 # 防守站位距本方球门线的深度（m）
+  guard_width: 2.8 # 门前横向覆盖宽度（m）
+  field_margin: 0.25 # 守门员目标点离边界/门柱的安全内缩（m）
+  activity_depth: 3.0 # 主动出击纵深（m），覆盖本方半场防止延迟导致启动晚
+  activity_width: 5.2 # 主动出击横向宽度（m），接近实测全场宽
+
+  ball_control_distance: 0.4 # 判定接触/控球的距离阈值（m）
+  lost_ball_y_margin: 0.12 # 球落到自己身后的纵向容忍量（m）
+  recover_guard_x_tolerance: 0.60 # 回防到门前释放 recover 的横向容忍（m）
+  recover_guard_y_tolerance: 0.35 # 回防到门前释放 recover 的纵向容忍（m）
+  clear_push_distance: 1.6 # 解围/带球推进目标距离（m）
+  clear_inward_pull: 0.8 # 边路解围时向中线回收的强度
+  sweep_speed: 0.8 # 闭环侧身推球的基础横走速度（m/s）
+  sweep_max_speed: 1.2 # 侧身推球最大合速度（m/s）
+  sweep_side_offset: 0.28 # 推球时球贴在机器人侧身的目标距离（m）
+  sweep_side_gain: 1.1 # 球相对侧身距离误差到横走速度的闭环增益
+  sweep_x_gain: 0.65 # 球相对机器人前后误差到微调速度的增益
+  sweep_x_max_speed: 0.32 # 推球时前后微调速度上限（m/s）
+  sweep_breakaway_distance: 0.85 # 球离身过远时退出推球闭环重新接近（m）
+
+  guard_max_speed: 0.6 # 门前归位/横移最大速度（m/s）
+  approach_max_speed: 1.2 # 接近球最大速度（m/s）
+  recover_max_speed: 1.2 # 丢球回防最大速度（m/s）
+  max_crab_speed: 1.2 # 所有横走指令的硬上限（m/s）
+  guard_deadband: 0.18 # 门前目标死区（m）
+  approach_deadband: 0.12 # 接近球目标死区（m）
+  recover_deadband: 0.28 # 回防目标死区（m）
+  slow_radius: 0.75 # 接近目标时的比例制动半径（m）
+  yaw_translation_gate: 0.4 # yaw 偏差超过该值后逐步压低平移速度（rad）
+  recover_ball_avoid_radius: 0.40 # 回防时球的绝对避障半径（m）
+  recover_robot_avoid_radius: 0.50 # 回防时其他机器狗避障半径（m）
+  recover_avoid_lateral: 0.50 # 回防绕障时横向绕行安全距离（m）
+
+  lateral_gain: 1.25 # 门线横移/封堵增益
+  drive_gain: 1.35 # 接近球、解围、带球推进增益
+  recover_gain: 1.3 # 丢球回防增益
+  yaw_gain: 1.2 # 横身姿态偏航增益
+
+  latency_bias: 0.02 # 在样本年龄基础上额外补偿的固定延迟（s）
+  prediction_horizon: 0.18 # 单次预测时间上限（s）
+  prediction_max_distance: 0.20 # 单次预测位移上限（m）
+  pose_timeout: 0.35 # self 位姿源时间戳超过该值则停机保护（s）
+  ball_timeout: 0.45 # ball 位姿源时间戳超过该值则只回防不追球（s）
+
+  command_accel_limit: 1.5 # 守门员平动加速度上限（m/s^2）
+  command_jerk_limit: 4.0 # 守门员平动 jerk 上限（m/s^3）
+
+# Goalkeeper 控制器模式选择：
+#   rule:   纯规则守门（src/goalkeeper.py 的 GoalkeeperNode）
+#   hybrid: 规则守门 + 安全层（guard/intercept/clear + safety recover）
+#   policy: 纯 PPO 模型 + 安全层
+goalkeeper_controller:
+  mode: rule # 当前使用的控制器模式
+  control_rate_hz: 10.0 # 控制循环频率（Hz）
+  safety_recover: true # 是否启用安全恢复（超出 keeper_zone 时强制回位）
+  max_goal_depth: 3.65 # 允许守门员离球门的最大纵深（m），超出触发恢复
+  recover_release_depth: 3.35 # 恢复模式解除的纵深阈值（m）
+  recover_gain: 0.8 # 恢复阶段的位置增益
+  recover_yaw_gain: 1.2 # 恢复阶段的偏航增益
+
+# 纯 PPO 守门策略配置。仅在 goalkeeper_controller.mode: policy 时生效。
+goalkeeper_policy:
+  model_path: checkpoints/goalkeeper_rl_pure/best/best_model.zip
+  deterministic: true # true = 确定性推理
+  device: auto # 推理设备：auto | cpu | cuda
+  max_linear_speed: 1.2 # 策略输出的线速度上限（m/s）
+  max_angular_speed: 3.0 # 策略输出的角速度上限（rad/s）
+  opponent_striker: opponent_1 # 用于观测的对手前锋刚体名

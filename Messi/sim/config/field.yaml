@@ -1,0 +1,53 @@
+field:
+  length: 8.8
+  width: 5.55
+  goal_width: 1.0
+  goal_depth: 0.35
+  center_circle_radius: 1.0
+  boundary_margin: 0.15
+
+physics:
+  ball_radius: 0.125
+  robot_length: 0.43
+  robot_body_width: 0.20
+  robot_leg_width: 0.32
+  robot_radius: 0.27
+  ball_friction: 1.5
+  wall_restitution: 0.6
+  ball_restitution: 0.7
+  robot_ball_restitution: 0.55
+  robot_ball_tangent_gain: 0.12
+  physics_hz: 50
+
+display:
+  screen_width: 1000
+  screen_height: 650
+  field_margin: 60
+  sidebar_width: 200
+
+kickoff_poses:
+  KICKOFF_A:
+    team_a_1: {x: 0.0, y: -0.5, yaw: 1.5708}
+    team_a_2: {x: 0.0, y: -4.72, yaw: 0.0}
+    team_b_1: {x: 0.0, y: 2.5, yaw: -1.5708}
+    team_b_2: {x: 0.0, y: 4.72, yaw: 0.0}
+    ball: {x: 0.0, y: 0.0, yaw: 0.0}
+  KICKOFF_B:
+    team_a_1: {x: 0.0, y: -2.5, yaw: 1.5708}
+    team_a_2: {x: 0.0, y: -4.72, yaw: 0.0}
+    team_b_1: {x: 0.0, y: 0.5, yaw: -1.5708}
+    team_b_2: {x: 0.0, y: 4.72, yaw: 0.0}
+    ball: {x: 0.0, y: 0.0, yaw: 0.0}
+
+field_marks:
+  kickoff:
+    - {x: 0.0, y: -0.5}
+    - {x: 0.0, y: 0.0}
+    - {x: 0.0, y: 0.5}
+  robot_starts:
+    - {x: 0.0, y: -2.5}
+    - {x: 0.0, y: 2.5}
+    - {x: -2.275, y: -4.5}
+    - {x: 2.275, y: -4.5}
+    - {x: -2.275, y: 4.5}
+    - {x: 2.275, y: 4.5}

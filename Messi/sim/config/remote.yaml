@@ -1,0 +1,25 @@
+# 远端战术板 SSH 连接配置
+# 在使用 sim/remote_tactical_board.py 前，请填写以下字段。
+
+ssh:
+  host: ""          # 机器人 IP 地址，例如 192.168.1.100
+  user: ""          # SSH 用户名，例如 mi
+  password: ""      # SSH 密码；若已配置 SSH 密钥则留空
+  remote_workspace: "~/cyberdog_soccer"  # 机器人上的仓库路径
+
+# 刚体名称映射：board 槽位 -> 动捕刚体名称
+# 槽位固定为 team_a_1 / team_a_2 / team_b_1 / team_b_2 / ball
+# 刚体名称填写动捕软件中实际使用的名称
+rigids:
+  team_a_1: ""   # 己方 Striker ，例如 SoTaGo1
+  team_a_2: ""   # 己方 Goalkeeper ，例如 SoTaGo2
+  team_b_1: ""   # 对方 Striker ，例如 opponent_1
+  team_b_2: ""   # 对方 Goalkeeper ，例如 opponent_2
+  ball: ""        # 足球，例如 ball
+
+# 可选：额外 source 的远端 ROS2 环境脚本（按顺序执行）
+# 默认已包含 /opt/ros2/cyberdog/setup.bash 和 /opt/ros2/galactic/setup.bash
+# 若需要额外 source，在此列出：
+extra_setups: []
+# extra_setups:
+#   - ~/vrpn_client_ros2/src/install/setup.bash
