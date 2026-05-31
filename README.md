@@ -56,7 +56,7 @@ cyberdog2_rl_lab_opensource/
 │   ├── rsl_rl/play.py                  # 步态回放 + 导出
 │   ├── rsl_rl/play_soccer.py           # 足球回放 + 导出
 │   ├── rsl_rl/little.py                # 轻量训练测试
-│   ├── export_soccer_policy.py         # 导出为 Flamez 兼容 ONNX
+│   ├── export_soccer_policy.py         # 导出为 Messi兼容 ONNX
 │   ├── export_policy_onnx.py           # 通用 ONNX 导出
 │   ├── export_locomotion_policy.py     # 步态策略导出
 │   ├── smoke_direct_tasks.py           # 冒烟测试 (Direct RL)
@@ -121,9 +121,6 @@ conda activate cyberdog
 python3 main.py --config config/config.yaml
 ```
 
-Messi 部署依赖详见 [Messi/README.md](Messi/README.md)。
-
----
 
 ## 仿真训练
 
@@ -165,10 +162,10 @@ python scripts/rsl_rl/train_soccer.py --curriculum all --phase1_iterations 500 -
 | Phase 2 (Skill 2) | + 带球推进 | 空场地 |
 | Phase 3 (Skill 3) | + 射门得分 | 空场地 |
 
-
-| Phase 2 | + 脚本化守门员 | striker + red goalkeeper |
-| Phase 3 | + 队友守门员 + 对手 striker | 完整 2v2 |
-| Phase 4 | + 延迟随机化 | 完整 2v2 + latency sim-to-real |
+时间受限 未完成
+| Phase 2 | + 守门员 | striker + red goalkeeper |
+| Phase 3 | + 队友守门员 + 对手进攻狗
+| Phase 4 | + 延迟随机化 | 完整 2v2 + sim-to-real |
 
 ---
 
